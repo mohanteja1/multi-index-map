@@ -50,7 +50,7 @@ const prodConfig = {
   output: {
     path: path.resolve(__dirname, './dist'),
     filename: 'index.js',
-    library: 'AsyncAbort',
+    library: 'MultiIndexMap',
     libraryTarget: 'umd',
     globalObject: 'this',
     umdNamedDefine: true,
