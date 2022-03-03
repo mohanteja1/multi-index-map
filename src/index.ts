@@ -2,7 +2,7 @@
 type IndexName = string;
 type Value = any;
 type Item = { [I: IndexName]: any };
-type nonPrimeToPrimeIndexValuesMap =  Map<Value, Value>;
+type NonPrimeToPrimeIndexValuesMap =  Map<Value, Value>;
 
 const ERRORS = {
   ITEM_NOT_OBJECT: new Error("MultiIndexMap: cannot add item as it is not an object"),
@@ -11,7 +11,7 @@ const ERRORS = {
 }
 
 class MultiIndexMap {
-  private nonPrimiIndexesMap: Map<IndexName, nonPrimeToPrimeIndexValuesMap>;
+  private nonPrimeIndexesMap: Map<IndexName, NonPrimeToPrimeIndexValuesMap>;
   private primeIndex: IndexName;
   private primeIndexItemMap: Map<IndexName, Item>;
   private indexNames: Array<IndexName>;
@@ -22,7 +22,7 @@ class MultiIndexMap {
     const [primeIndex, ...nonPrimeIndexes] = indexNames;
     this.primeIndex = primeIndex;
     this.primeIndexItemMap = new Map();
-    this.nonPrimiIndexesMap = items.reduce<Map<IndexName, nonPrimeToPrimeIndexValuesMap>>((acc, item) => {
+    this.nonPrimeIndexesMap = items.reduce<Map<IndexName, NonPrimeToPrimeIndexValuesMap>>((acc, item) => {
       if (typeof item !== 'object') throw ERRORS.ITEM_NOT_OBJECT;
       if (!item.hasOwnProperty(primeIndex)) throw ERRORS.INDEXED_PROPERTY_NOT_FOUND_IN_ITEM;
       this.primeIndexItemMap.set(item[primeIndex], item);
@@ -31,40 +31,40 @@ class MultiIndexMap {
         acc.get(indexName)?.set(item[indexName], item[primeIndex]);
       })
       return acc;
-    }, new Map(indexNames.map(indexName => [indexName, new Map()])));
+    }, new Map(nonPrimeIndexes.map(indexName => [indexName, new Map()])));
   }
 
   get(indexName: IndexName, indexValue: any) : Item | undefined {
     if (indexName === this.primeIndex) return this.primeIndexItemMap.get(indexValue);
-    return this.primeIndexItemMap.get(this.nonPrimiIndexesMap.get(indexName)?.get(indexValue));
+    return this.primeIndexItemMap.get(this.nonPrimeIndexesMap.get(indexName)?.get(indexValue));
   }
 
   set(item: Item) {
-    for (const key in this.indexNames) {
+    this.indexNames.forEach((key) => {
       if (!item.hasOwnProperty(key)) throw ERRORS.INDEXED_PROPERTY_NOT_FOUND_IN_ITEM;
-    }
+    });
     const [primeIndex, ...nonPrimeIndexes] = this.indexNames;
     this.primeIndexItemMap.set(item[primeIndex], item);
-    for (const key in nonPrimeIndexes) {
-      this.nonPrimiIndexesMap.get(key)?.set(item[key], item[primeIndex]);
-    }
+    nonPrimeIndexes.forEach((key) => {
+      this.nonPrimeIndexesMap.get(key)?.set(item[key], item[primeIndex]);
+    });
   }
 
   has(indexName: IndexName, indexValue: Value): boolean {
-    return !!this.nonPrimiIndexesMap.get(indexName)?.has(indexValue);
+    if (indexName === this.primeIndex) return this.primeIndexItemMap.has(indexValue);
+    return !!this.nonPrimeIndexesMap.get(indexName)?.has(indexValue);
   }
 
   delete(indexName: IndexName, indexValue: Value) {
     const item = this.get(indexName, indexValue);
     if (item) {
       const [primeIndex, ...nonPrimeIndexes] = this.indexNames;
-      for (const key in nonPrimeIndexes) {
-        this.nonPrimiIndexesMap.get(key)?.delete(item[key]);
-      }
+      nonPrimeIndexes.forEach((key) => {
+        this.nonPrimeIndexesMap.get(key)?.delete(item[key]);
+      });
       this.primeIndexItemMap.delete(item[primeIndex]);
     }
   }
-
 }
 
 

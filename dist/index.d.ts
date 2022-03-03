@@ -4,7 +4,7 @@ declare type Item = {
     [I: IndexName]: any;
 };
 declare class MultiIndexMap {
-    private nonPrimiIndexesMap;
+    private nonPrimeIndexesMap;
     private primeIndex;
     private primeIndexItemMap;
     private indexNames;
