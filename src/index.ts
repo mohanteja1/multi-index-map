@@ -5,33 +5,32 @@ type Item = { [I: IndexName]: any };
 type NonPrimeToPrimeIndexValuesMap =  Map<Value, Value>;
 
 const ERRORS = {
-  ITEM_NOT_OBJECT: new Error("MultiIndexMap: cannot add item as it is not an object"),
-  INDEXED_PROPERTY_NOT_FOUND_IN_ITEM: new Error("MultiIndexMap: cannot add as an indexed property is not found in item"),
-  INDEXNAMES_EMPTY: new Error("MultiIndexMap: index names cannot be empty or undefined"),
+  ITEM_NOT_OBJECT: "MultiIndexMap: cannot add item as it is not an object",
+  INDEXED_PROPERTY_NOT_FOUND_IN_ITEM: "MultiIndexMap: cannot add as an indexed property is not found in item",
+  INDEXNAMES_EMPTY: "MultiIndexMap: index names cannot be empty or undefined",
+  INDEXED_VALUES_NOT_UNIQUE: "MultiIndexMap: indexed prop values should be unique",
 }
 
 class MultiIndexMap {
+  private primeIndexItemMap: Map<IndexName, Item>;
   private nonPrimeIndexesMap: Map<IndexName, NonPrimeToPrimeIndexValuesMap>;
   private primeIndex: IndexName;
-  private primeIndexItemMap: Map<IndexName, Item>;
+  private nonPrimeIndexes: Array<IndexName>;
   private indexNames: Array<IndexName>;
 
   constructor(indexNames: Array<IndexName>, items: Array<Item> = []) {
-    if (!indexNames?.length) throw ERRORS.INDEXNAMES_EMPTY;
+    if (!indexNames?.length) throw new Error(ERRORS.INDEXNAMES_EMPTY);
     this.indexNames = indexNames;
     const [primeIndex, ...nonPrimeIndexes] = indexNames;
     this.primeIndex = primeIndex;
+    this.nonPrimeIndexes = nonPrimeIndexes;
+    this.__initMaps();
+    items.forEach((item) => this.set(item));
+  }
+
+  private __initMaps() {
     this.primeIndexItemMap = new Map();
-    this.nonPrimeIndexesMap = items.reduce<Map<IndexName, NonPrimeToPrimeIndexValuesMap>>((acc, item) => {
-      if (typeof item !== 'object') throw ERRORS.ITEM_NOT_OBJECT;
-      if (!item.hasOwnProperty(primeIndex)) throw ERRORS.INDEXED_PROPERTY_NOT_FOUND_IN_ITEM;
-      this.primeIndexItemMap.set(item[primeIndex], item);
-      nonPrimeIndexes.forEach((indexName) => {
-        if (!item.hasOwnProperty(indexName)) throw ERRORS.INDEXED_PROPERTY_NOT_FOUND_IN_ITEM;
-        acc.get(indexName)?.set(item[indexName], item[primeIndex]);
-      })
-      return acc;
-    }, new Map(nonPrimeIndexes.map(indexName => [indexName, new Map()])));
+    this.nonPrimeIndexesMap = new Map(this.nonPrimeIndexes.map(indexName => [indexName, new Map()]));
   }
 
   get(indexName: IndexName, indexValue: any) : Item | undefined {
@@ -40,13 +39,14 @@ class MultiIndexMap {
   }
 
   set(item: Item) {
+    if (typeof item !== 'object') throw new Error(ERRORS.ITEM_NOT_OBJECT);
     this.indexNames.forEach((key) => {
-      if (!item.hasOwnProperty(key)) throw ERRORS.INDEXED_PROPERTY_NOT_FOUND_IN_ITEM;
+      if (!item.hasOwnProperty(key)) throw new Error(ERRORS.INDEXED_PROPERTY_NOT_FOUND_IN_ITEM);
+      if (this.has(key, item[key])) throw new Error(ERRORS.INDEXED_VALUES_NOT_UNIQUE);
     });
-    const [primeIndex, ...nonPrimeIndexes] = this.indexNames;
-    this.primeIndexItemMap.set(item[primeIndex], item);
-    nonPrimeIndexes.forEach((key) => {
-      this.nonPrimeIndexesMap.get(key)?.set(item[key], item[primeIndex]);
+    this.primeIndexItemMap.set(item[this.primeIndex], item);
+    this.nonPrimeIndexes.forEach((key) => {
+      this.nonPrimeIndexesMap.get(key)?.set(item[key], item[this.primeIndex]);
     });
   }
 
@@ -58,13 +58,31 @@ class MultiIndexMap {
   delete(indexName: IndexName, indexValue: Value) {
     const item = this.get(indexName, indexValue);
     if (item) {
-      const [primeIndex, ...nonPrimeIndexes] = this.indexNames;
-      nonPrimeIndexes.forEach((key) => {
+      this.nonPrimeIndexes.forEach((key) => {
         this.nonPrimeIndexesMap.get(key)?.delete(item[key]);
       });
-      this.primeIndexItemMap.delete(item[primeIndex]);
+      this.primeIndexItemMap.delete(item[this.primeIndex]);
     }
   }
+
+  keys(indexName: IndexName): IterableIterator<string> {
+    if (indexName === this.primeIndex) return this.primeIndexItemMap.keys();
+    return this.nonPrimeIndexesMap.get(indexName)?.keys();
+  }
+
+  values(): IterableIterator<Item> {
+    return this.primeIndexItemMap.values();
+  }
+
+  clear() {
+    this.__initMaps();
+  }
+
+
+  get size(): number {
+    return this.primeIndexItemMap.size;
+  }
+
 }
 
 
