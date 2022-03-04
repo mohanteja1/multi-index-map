@@ -78,11 +78,9 @@ class MultiIndexMap {
     this.__initMaps();
   }
 
-
   get size(): number {
     return this.primeIndexItemMap.size;
   }
-
 }
 
 

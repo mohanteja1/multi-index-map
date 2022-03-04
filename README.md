@@ -58,13 +58,23 @@ $ yarn add multi-index-map
 ```
 
 ## Time and Space Complexities
+where m: no of indexes, n: no of items
  1. only properties are indexed and items are not duplicated: 
-     m indextables for n index values =  O(m*n)
-     n items table =  O(n)
- 2. all operations : get, set, delete, has are performed in : O(1)
+     m-1 indextables n items each =  O((m - 1) * n)
+     1 main table with n items =  O(n)
+ 2. operations
+
+| operation          | complexity |
+|--------------------|--------|
+| new MultiIndex(..) | O(m*n) |
+| get                | O(1)   |
+| set                | O(m)   |
+| has                | O(1)   |
+| delete             | O(m)   |
 
 ## Resources
 
 * [Changelog](https://github.com/mohanteja1/multi-index-map/blob/master/CHANGELOG.md)
 
 ## License
+[MIT](LICENSE)
