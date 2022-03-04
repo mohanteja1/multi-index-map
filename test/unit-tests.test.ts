@@ -1,21 +1,6 @@
 import MultiIndexMap from '../src/index';
 import flushPromises from 'flush-promises';
-import { expect } from '@jest/globals';
 
-// let data = [];
-// for (let i = 0; i < 15; i++) {
-
-//   let obj = {
-//     id: faker.datatype.uuid(),
-//     email: faker.internet.email(),
-//     "phone": faker.phone.phoneNumber(),
-//     "name": faker.name.findName(),
-//     "address": faker.address.streetAddress(),
-//     "about": faker.lorem.sentence(),
-//     "age": faker.datatype.number(), // some int
-//   }
-//   data.push(obj);
-// }
 
 let testdata = [
   {
@@ -147,18 +132,6 @@ let testdata = [
 
 ]
 
-// test data from faker js
-const sampleItems = [
-  {
-    "id": "uuid",
-    "email": "unique email",
-    "phone": "unique phone",
-    "name": "some name string",
-    "address": "some address string",
-    "about": "some text",
-    "age": 1, // some int
-  },
-];
 
 beforeAll(() => {
 
@@ -167,6 +140,18 @@ beforeAll(() => {
 afterAll(() => {
 
 })
+
+
+const expectedData = {
+  "id": "ecc90d26-cea9-4f1d-bb6c-75be45451b78",
+  "email": "Anahi.Hoppe98@hotmail.com",
+  "phone": "1-360-575-0309 x33137",
+  "name": "Luz Hammes Jr.",
+  "address": "315 Kovacek Square",
+  "about": "Quibusdam et tenetur et eveniet laborum error.",
+  "age": 87329
+}
+
 
 describe('MultiIndexMap: ', () => {
   describe('Initialization: ', () => {
@@ -202,43 +187,16 @@ describe('MultiIndexMap: ', () => {
 
     it(" should find , get and match data using indexName[0] as indexName ", () => {
       let multiIndexMap = new MultiIndexMap(['id', 'email', 'phone'], testdata);
-      let expectedData = {
-        "id": "ecc90d26-cea9-4f1d-bb6c-75be45451b78",
-        "email": "Anahi.Hoppe98@hotmail.com",
-        "phone": "1-360-575-0309 x33137",
-        "name": "Luz Hammes Jr.",
-        "address": "315 Kovacek Square",
-        "about": "Quibusdam et tenetur et eveniet laborum error.",
-        "age": 87329
-      }
       expect(multiIndexMap.get('id', 'ecc90d26-cea9-4f1d-bb6c-75be45451b78')).toStrictEqual(expectedData);
     });
 
     it("should find , get and match data using  indexName[1]  ", () => {
       let multiIndexMap = new MultiIndexMap(['id', 'email', 'phone'], testdata);
-      let expectedData = {
-        "id": "ecc90d26-cea9-4f1d-bb6c-75be45451b78",
-        "email": "Anahi.Hoppe98@hotmail.com",
-        "phone": "1-360-575-0309 x33137",
-        "name": "Luz Hammes Jr.",
-        "address": "315 Kovacek Square",
-        "about": "Quibusdam et tenetur et eveniet laborum error.",
-        "age": 87329
-      }
       expect(multiIndexMap.get('email', 'Anahi.Hoppe98@hotmail.com')).toStrictEqual(expectedData);
     });
 
     it("should find , get and match data using  indexName[2] ", () => {
       let multiIndexMap = new MultiIndexMap(['id', 'email', 'phone'], testdata);
-      let expectedData = {
-        "id": "ecc90d26-cea9-4f1d-bb6c-75be45451b78",
-        "email": "Anahi.Hoppe98@hotmail.com",
-        "phone": "1-360-575-0309 x33137",
-        "name": "Luz Hammes Jr.",
-        "address": "315 Kovacek Square",
-        "about": "Quibusdam et tenetur et eveniet laborum error.",
-        "age": 87329
-      }
       expect(multiIndexMap.get("phone", "1-360-575-0309 x33137")).toStrictEqual(expectedData);
     });
 
