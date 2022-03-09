@@ -2,7 +2,11 @@
   "name": "multi-index-map",
   "version": "1.0.0",
   "description": "a map that can set multiple indexes on a given list of objects",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build:watch": "webpack --mode=production --watch --progress",
     "build": "webpack --mode=production",

@@ -47,6 +47,7 @@ const prodConfig = {
   entry: {
     index: './src/index.ts',
   },
+  devtool: 'source-map',
   output: {
     path: path.resolve(__dirname, './dist'),
     filename: 'index.js',
